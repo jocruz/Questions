@@ -1,36 +1,141 @@
-## Figma URL
 
-[Accordion](https://www.figma.com/file/TAwJ3kWOqkw0o8UVtAMOHO/Accordion?node-id=0%3A1&t=1YEti8xBykw69tBH-1)
+## Accordion Component Guide
 
-## Steps
+### Figma Design
+You can find the design specs for the Accordion component on Figma:
+[View Design](https://www.figma.com/file/TAwJ3kWOqkw0o8UVtAMOHO/Accordion?node-id=0%3A1&t=1YEti8xBykw69tBH-1)
 
-#### Examine and Import Data
+### Implementation Steps
 
-Review data.js and import the questions array from data.js into your project. This array should contain objects that represent the questions and their associated data, such as the question text
+#### 1. Import Data
+Begin by reviewing the `data.js` file which contains an array named `questions`. Each object within this array holds the details for each question and its associated answer. Import this array into your main application file.
 
-#### Setup State Value
+Example:
+```javascript
+import questions from "./data";
+```
 
-Next, set up the questions array as a state variable using the useState hook. This will allow you to modify the data and have those changes automatically reflected in the rendered output.
+#### 2. Set Up State
+Use the `useState` hook from React to manage the questions data. This state will allow you to dynamically modify and render the questions based on user interactions.
 
-#### Render Questions
+Example:
+```javascript
+const [data, setData] = useState(questions);
+```
 
-To display the list of questions, you can iterate over the questions array and render a SingleQuestion component for each item in the array. Each SingleQuestion component should display the question text in the header, along with a button to toggle the question text.
+#### 3. Render Questions
+Map over the `data` array to render a `SingleQuestion` component for each question. Pass necessary props to manage the visibility of the answer text.
 
-#### Toggle Question
+Example:
+```javascript
+<Questions quests={data} buttonId={buttonId} setActive={setActive} />
+```
 
-In the SingleQuestion component, you can set up the functionality for the toggle button by defining a function that toggles the state of a "showInfo" flag. When the flag is set to true, the answer text will be displayed. When the flag is set to false, only the question text will be displayed.
+#### 4. Toggle Visibility
+In the `SingleQuestion` component, manage the visibility of the answer text using a boolean flag that toggles when the question header is clicked.
 
-#### Extra Challenge
+Example:
+```javascript
+const isActive = id === buttonId;
+<button onClick={() => setActive(id)}>
+  {isActive ? <AiOutlineMinus /> : <AiOutlinePlus />}
+</button>
+<p>{isActive ? info : ""}</p>
+```
 
-To set up the functionality where only one question is displayed at a time, you can modify the state of the questions array to keep track of the currently selected question. You can do this by defining a function that updates the state to reflect the selected question index. Then, you can use the selected question index to render only the SingleQuestion component that corresponds to the currently selected question.
+#### 5. Manage Active Question
+Implement functionality to ensure that only one answer can be expanded at a time. This involves managing which question's button is active through a unique identifier.
 
-Overall, the flow of the application should look something like this:
+Example:
+```javascript
+const setActive = (id) => {
+  id !== buttonId ? setButtonId(id) : setButtonId(null);
+};
+```
 
-- Import the questions array from data.js into your project.
-- Set up the questions array as a state variable using the useState hook.
-- Iterate over the questions array and render a SingleQuestion component for each item in the array.
-- In the SingleQuestion component, display the question text in the header and a button to toggle the question text.
-- Define a function that toggles the state of a "showAnswer" flag, which determines whether the answer text is displayed or not.
-- Modify the state of the questions array to keep track of the currently selected question index.
-- Define a function that updates the state to reflect the selected question index.
-- Use the selected question index to render only the SingleQuestion component that corresponds to the currently selected question.
+### Extra Challenge
+Enhance the component by adding animations for expanding and collapsing the answers, or by saving the open state to local storage so it persists across page reloads.
+
+### Code Overview
+
+#### App Component
+This is the main component where the state for the active button ID is managed and the `Questions` component is rendered.
+
+```javascript
+import { useState } from "react";
+import questions from "./data";
+import Questions from "./Questions";
+
+const App = () => {
+  const [buttonId, setButtonId] = useState(null);
+
+  const setActive = (id) => {
+    id !== buttonId ? setButtonId(id) : setButtonId(null);
+  };
+
+  return (
+    <main>
+      <Questions quests={questions} buttonId={buttonId} setActive={setActive} />
+    </main>
+  );
+};
+
+export default App;
+```
+
+#### Questions Component
+This component is responsible for rendering each `SingleQuestion` component.
+
+```javascript
+import React from "react";
+import SingleQuestion from "./SingleQuestion";
+
+const Questions = ({ quests, buttonId, setActive }) => {
+  return (
+    <div className="container">
+      {quests.map((single) => (
+        <SingleQuestion
+          key={single.id}
+          {...single}
+          buttonId={buttonId}
+          setActive={setActive}
+        />
+      ))}
+    </div>
+  );
+};
+
+export default Questions;
+```
+
+#### SingleQuestion Component
+Each question is rendered with a toggle button to show or hide its answer.
+
+```javascript
+import React from "react";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+
+const SingleQuestion = ({ id, title, info, buttonId, setActive }) => {
+  const isActive = id === buttonId;
+
+  return (
+    <article className="question">
+      <header>
+        <h5>{title}</h5>
+        <button
+          type="button"
+          className="question-btn"
+          onClick={() => setActive(id)}
+        >
+          {isActive ? <AiOutlineMinus /> : <AiOutlinePlus />}
+        </button>
+      </header>
+      <p>{isActive ? info : ""}</p>
+    </article>
+  );
+};
+
+export default SingleQuestion;
+```
+
+---
